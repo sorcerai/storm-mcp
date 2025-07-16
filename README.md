@@ -31,35 +31,262 @@ An MCP (Model Context Protocol) server implementation that extends Stanford's ST
 - 🎯 **Flexible Pipeline**: Run full pipeline, individual stages, or swarm mode
 - ⚡ **Parallel Processing**: Swarm agents work simultaneously for faster results
 
+## Prerequisites
+
+### Required MCP Tools
+This server requires the following MCP tools to be available in your Claude Code environment:
+
+1. **Google Gemini CLI MCP** - For Gemini 2.5 Pro integration
+   - Install: Follow [Google Gemini CLI MCP setup](https://github.com/google/generative-ai-mcp)
+   - Tools used: `mcp__google-gemini-cli__gemini`
+
+2. **Claude Flow MCP** (Optional) - For advanced swarm orchestration
+   - Install: `npm install -g claude-flow@alpha`
+   - Tools used: `mcp__claude-flow__swarm_init`, `mcp__claude-flow__agent_spawn`
+
+3. **Kimi K2 API Access** - For premium technical analysis
+   - Get API key from [Moonshot AI](https://platform.moonshot.cn)
+   - Model: `kimi-k2-0711-preview`
+
+### System Requirements
+- **Node.js**: 18.0.0 or higher
+- **Claude Code**: Latest version with MCP support
+- **Operating System**: macOS, Linux, or Windows
+
 ## Installation
 
-1. Clone this repository:
+### 1. Clone and Setup
 ```bash
-cd /Users/ariapramesi/claude-mcp/storm-mcp
-```
-
-2. Install dependencies:
-```bash
+git clone https://github.com/sorcerai/storm-mcp.git
+cd storm-mcp
 npm install
 ```
 
-3. Set up authentication:
-   - **Google Gemini**: Run `npx google-gemini-cli@latest auth` to authenticate
-   - **Kimi K2**: Copy `.env.example` to `.env` (API key included for testing)
-   - **Claude**: Works natively through Claude Code
-
-4. Add to Claude Desktop configuration:
+### 2. Configure API Keys
 ```bash
-# Add to ~/Library/Application Support/Claude/claude_desktop_config.json
+cp .env.example .env
+# Edit .env and add your Kimi API key:
+# KIMI_API_KEY=your_kimi_api_key_here
+```
+
+### 3. Authentication Setup
+
+#### Google Gemini (Free with Google Subscription)
+```bash
+# Install and authenticate Gemini CLI
+npm install -g @google-ai/generative-ai-cli
+gemini auth
+```
+
+#### Kimi K2 (Paid API)
+- Sign up at [Moonshot AI Platform](https://platform.moonshot.cn)
+- Create API key
+- Add to `.env` file as `KIMI_API_KEY=your_key_here`
+
+#### Claude (Free via Claude Code)
+- No setup required - works natively through Claude Code
+
+### 4. Add to Claude Code
+Add this server to your Claude Code MCP configuration:
+
+```json
 {
   "mcpServers": {
     "storm-mcp": {
       "command": "node",
-      "args": ["/Users/ariapramesi/claude-mcp/storm-mcp/server.js"]
+      "args": ["/path/to/storm-mcp/server.js"]
     }
   }
 }
 ```
+
+**Configuration file locations:**
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
+- **Linux**: `~/.config/Claude/claude_desktop_config.json`
+
+### 5. Test Installation
+```bash
+# Test the MCP server
+node server.js
+
+# Should show: "STORM MCP Server running on stdio"
+```
+
+### 6. Restart Claude Code
+After adding the MCP server configuration, restart Claude Code to load the new server.
+
+## Usage
+
+### Basic Usage
+```javascript
+// Generate an article using swarm mode
+storm_run_swarm_pipeline({
+  topic: "The Future of Quantum Computing",
+  swarm_type: "claude-flow",
+  research_depth: "deep",
+  article_length: "comprehensive"
+})
+```
+
+### Advanced Usage
+```javascript
+// Create a custom swarm configuration
+storm_create_swarm("Artificial Intelligence in Healthcare", {
+  swarmType: "claude-flow",
+  topology: "hierarchical",
+  maxAgents: 10,
+  strategy: "specialized"
+})
+```
+
+## Agent Configuration
+
+### Quality-Optimized Distribution (Default)
+- **Claude Sonnet 4**: 5 agents (50%) - Best general performance, FREE
+- **Gemini 2.5 Pro**: 3 agents (30%) - Massive context, thinking mode, FREE with subscription
+- **Kimi K2**: 2 agents (20%) - Premium technical analysis, PAID
+
+### Agent Roles
+- **Researcher**: Fact-finding and perspective generation
+- **Architect**: System design and structure planning
+- **Specialist**: Domain-specific expertise
+- **Coordinator**: Task orchestration and management
+- **Reviewer**: Quality control and validation
+- **Optimizer**: Performance and efficiency improvements
+
+## Configuration Options
+
+### Research Depth
+- **`quick`**: Fast research, 3 sources per perspective
+- **`standard`**: Balanced approach, 5 sources per perspective  
+- **`deep`**: Comprehensive research, 10 sources per perspective
+
+### Article Length
+- **`short`**: ~1,500 words
+- **`medium`**: ~3,000 words
+- **`long`**: ~5,000 words
+- **`comprehensive`**: 7,000+ words
+
+### Swarm Types
+- **`claude-flow`**: Advanced orchestration with memory and coordination
+- **`ruv-swarm`**: Alternative swarm implementation
+- **`basic`**: Simple multi-agent coordination
+
+## Troubleshooting
+
+### MCP Server Not Loading
+1. **Check Claude Code configuration**:
+   ```bash
+   # Verify config file exists
+   ls ~/Library/Application\ Support/Claude/claude_desktop_config.json
+   
+   # Check for syntax errors
+   cat ~/Library/Application\ Support/Claude/claude_desktop_config.json | python -m json.tool
+   ```
+
+2. **Verify server path is correct**:
+   ```json
+   {
+     "mcpServers": {
+       "storm-mcp": {
+         "command": "node",
+         "args": ["/absolute/path/to/storm-mcp/server.js"]
+       }
+     }
+   }
+   ```
+
+3. **Test server manually**:
+   ```bash
+   cd /path/to/storm-mcp
+   node server.js
+   ```
+
+### API Authentication Issues
+
+#### Gemini CLI Issues
+```bash
+# Check authentication status
+gemini auth status
+
+# Re-authenticate if needed
+gemini auth login
+```
+
+#### Kimi API Issues
+- Verify API key is valid
+- Check remaining credits at [Moonshot AI Platform](https://platform.moonshot.cn)
+- Ensure `.env` file is properly formatted
+
+#### Claude Code Issues
+- Update Claude Code to latest version
+- Check MCP protocol compatibility
+- Verify no conflicting MCP servers
+
+### Performance Issues
+1. **Reduce concurrent agents**: Lower `maxAgents` in swarm configuration
+2. **Use lighter research depth**: Switch from `deep` to `standard` or `quick`
+3. **Check API rate limits**: Especially for Kimi K2 API
+4. **Monitor system resources**: Ensure adequate memory and CPU
+
+### Quality Issues
+1. **Increase research depth**: Use `deep` instead of `standard`
+2. **Enable premium analysis**: Ensure Kimi K2 API is configured
+3. **Use hierarchical topology**: Better for complex topics
+4. **Increase agent count**: More agents = more perspectives
+
+## Cost Optimization
+
+### Free Tier Strategy
+- **Claude**: Free via Claude Code (unlimited)
+- **Gemini**: Free with Google subscription
+- **Kimi**: Use only for premium technical content
+
+### Paid Usage Guidelines
+- **Light usage**: Standard depth, 5-7 agents
+- **Medium usage**: Deep research, 8-10 agents
+- **Heavy usage**: Comprehensive articles, 10+ agents
+
+### Cost Monitoring
+```javascript
+// Monitor API usage
+storm_get_usage_stats()
+
+// Optimize for cost
+storm_optimize_for_cost({
+  max_kimi_calls: 5,
+  prefer_free_models: true
+})
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Add tests for new functionality
+4. Submit a pull request
+
+## License
+
+MIT License - See LICENSE file for details
+
+## Support
+
+- **Issues**: [GitHub Issues](https://github.com/sorcerai/storm-mcp/issues)
+- **Documentation**: [Wiki](https://github.com/sorcerai/storm-mcp/wiki)
+- **Discussions**: [GitHub Discussions](https://github.com/sorcerai/storm-mcp/discussions)
+
+## Acknowledgments
+
+- Stanford OVAL team for the original STORM research
+- Anthropic for the MCP protocol and Claude Code
+- Google for Gemini API access
+- Moonshot AI for Kimi K2 API access
+
+---
+
+**Built with ❤️ for AI-powered knowledge synthesis**
 
 ## Usage
 
