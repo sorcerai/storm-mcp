@@ -23,13 +23,7 @@ export class LLMDispatcher {
         article: new GeminiMCPAdapter('gemini-2.5-pro'),
         polish: new GeminiMCPAdapter('gemini-2.5-pro-deep')
       },
-      kimi: {
-        conversation: new KimiMCPAdapter('kimi-k2-0711-preview'),
-        question: new KimiMCPAdapter('kimi-k2-0711-preview'),
-        outline: new KimiMCPAdapter('kimi-k2-0711-preview'),
-        article: new KimiMCPAdapter('kimi-k2-0711-preview'),
-        polish: new KimiMCPAdapter('kimi-k2-0711-preview')
-      }
+      kimi: this.initializeKimiAdapters()
     };
 
     // Task routing rules - OPTIMIZED FOR COST (TWO FREE MODELS!)
@@ -131,6 +125,29 @@ export class LLMDispatcher {
         reason: 'Claude is FREE with excellent technical understanding'
       }
     };
+  }
+
+  initializeKimiAdapters() {
+    // Initialize Kimi adapters with proper error handling
+    try {
+      return {
+        conversation: new KimiMCPAdapter('kimi-k2-0711-preview'),
+        question: new KimiMCPAdapter('kimi-k2-0711-preview'),
+        outline: new KimiMCPAdapter('kimi-k2-0711-preview'),
+        article: new KimiMCPAdapter('kimi-k2-0711-preview'),
+        polish: new KimiMCPAdapter('kimi-k2-0711-preview')
+      };
+    } catch (error) {
+      console.warn('Kimi API key not configured, using fallback adapters:', error.message);
+      // Return null adapters - system will fallback to Claude/Gemini
+      return {
+        conversation: null,
+        question: null,
+        outline: null,
+        article: null,
+        polish: null
+      };
+    }
   }
 
   async executeTask(task, agent) {
@@ -310,7 +327,15 @@ Decision: [PREMIUM or STANDARD]`;
     };
     
     const adapterType = adapterMap[taskType] || 'conversation';
-    return this.adapters[llm][adapterType];
+    const adapter = this.adapters[llm][adapterType];
+    
+    // If adapter is null (e.g., Kimi not configured), fallback to Claude
+    if (!adapter) {
+      console.warn(`${llm} adapter not available for ${taskType}, falling back to Claude`);
+      return this.adapters.claude[adapterType];
+    }
+    
+    return adapter;
   }
 
   async generatePerspective(adapter, task) {

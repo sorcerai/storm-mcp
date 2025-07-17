@@ -7,8 +7,13 @@ export class KimiMCPAdapter {
   constructor(model = 'kimi-k2-0711-preview') {
     this.model = model;
     this.provider = 'kimi';
-    this.apiKey = process.env.KIMI_API_KEY || 'sk-uBlo6squ9lBSu3idX4rBK8JO78XxhIdN1YjmQiRTWAgjD9JD';
+    this.apiKey = process.env.KIMI_API_KEY;
     this.baseUrl = 'https://api.moonshot.ai/v1';
+    
+    // Validate API key is configured
+    if (!this.apiKey) {
+      throw new Error('KIMI_API_KEY environment variable is required but not set');
+    }
   }
 
   async generateText(prompt, options = {}) {
